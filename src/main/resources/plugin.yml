@@ -8,14 +8,14 @@ author: R2bEEaton
 website: spea.cc
 prefix: CoreProtectTimeLapse
 depend: [CoreProtect]
-#commands:
-#  command:
-#    description: Command Description
-#    aliases:
-#      - command alias
-#    permission: CoreProtectTimeLapse.command
-#    permission-message: You do not have permission!
-#permissions:
-#  CoreProtectTimeLapse.command:
-#    description: Permission Description
-#    default: op
+commands:
+  cptl:
+    description: Control CPTL
+    aliases:
+      - coreprotecttimelapse
+    permission: CoreProtectTimeLapse.cptl
+    permission-message: You do not have permission!
+permissions:
+  CoreProtectTimeLapse.cptl:
+    description: CoreProtect timelapse
+    default: op
