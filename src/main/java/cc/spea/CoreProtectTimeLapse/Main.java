@@ -25,6 +25,7 @@ public class Main extends JavaPlugin {
             // Stop tick speed
             // Custom radius
             // Allow undo at the end
+            // Get list of affected regions for backup restore purposes
 
             ArrayList<Thread> threadArrayList = new ArrayList<>();
 
