@@ -2,19 +2,21 @@ plugins {
     id 'java'
 }
 
-group = 'cc.spea.SpigotTemplate'
+group = 'cc.spea.CoreProtectTimeLapse'
 version = '1.0.0'
 
 repositories {
     mavenCentral()
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url 'https://maven.playpro.com/' }
 }
 
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     compileOnly 'org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT'
+    compileOnly ('net.coreprotect:coreprotect:21.0'){ transitive = false}
 }
 
 test {

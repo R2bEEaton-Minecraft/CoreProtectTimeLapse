@@ -1,20 +1,21 @@
-main: cc.spea.SpigotTemplate.Main
-name: SpigotTemplate
+main: cc.spea.CoreProtectTimeLapse.Main
+name: CoreProtectTimeLapse
 version: '1.0.0'
 api-version: '1.20'
-description: SpigotTemplate
+description: CoreProtectTimeLapse
 load: POSTWORLD
 author: R2bEEaton
 website: spea.cc
-prefix: SpigotTemplate
+prefix: CoreProtectTimeLapse
+depend: [CoreProtect]
 #commands:
 #  command:
 #    description: Command Description
 #    aliases:
 #      - command alias
-#    permission: SpigotTemplate.command
+#    permission: CoreProtectTimeLapse.command
 #    permission-message: You do not have permission!
 #permissions:
-#  SpigotTemplate.command:
+#  CoreProtectTimeLapse.command:
 #    description: Permission Description
 #    default: op
