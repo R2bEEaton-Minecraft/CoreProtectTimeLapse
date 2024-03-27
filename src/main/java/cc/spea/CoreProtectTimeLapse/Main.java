@@ -47,6 +47,7 @@ public class Main extends JavaPlugin {
                                         .then(new IntegerArgument("endTime", 0)
                                             .executesPlayer((player, args) -> {
                                                 player.sendMessage("started " + args);
+                                                player.sendMessage(String.valueOf(System.currentTimeMillis() / 1000L));
                                             })))))
                 .then(new LiteralArgument("stop")
                     .executesPlayer((player, args) -> {
