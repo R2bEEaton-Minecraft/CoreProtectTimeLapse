@@ -11,6 +11,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
+import org.checkerframework.checker.units.qual.C;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,21 +40,19 @@ public class Main extends JavaPlugin {
     public void onEnable() {
         CommandAPI.onEnable();
 
-        new CommandTree("cptl")
-                .withAliases("coreprotecttimelapse")
-                .then(new LiteralArgument("start")
-                        .then(new IntegerArgument("radius", 100, 512)
-                                .then(new IntegerArgument("startTime", 0)
-                                        .then(new IntegerArgument("endTime", 0)
-                                            .executesPlayer((player, args) -> {
-                                                player.sendMessage("started " + args);
-                                                player.sendMessage(String.valueOf(System.currentTimeMillis() / 1000L));
-                                            })))))
-                .then(new LiteralArgument("stop")
-                    .executesPlayer((player, args) -> {
-                        player.sendMessage("stopped " + args);
-                    }))
-                .register();
+        CommandManager cm = new CommandManager(this);
+        cm.registerAll();
+
+        // TODO:
+        // Fix entities, tile entities
+        // Look into decay, water spread, etc.
+        // Change start time and end time to absolute times
+        // Stop tick speed
+        // Custom radius
+        // Allow undo at the end
+        // Get list of affected regions for backup restore purposes
+
+        // api.performRollback(i, 60, null, null, null, null, null, 512, Bukkit.getWorlds().get(0).getSpawnLocation());
 
         Bukkit.broadcastMessage("CoreProtectTimeLapse enabled.");
     }
