@@ -15,6 +15,7 @@ public class CommandManager {
     public CommandManager(JavaPlugin plugin) {
         this.plugin = plugin;
     }
+    private Thread rollbackThread;
 
     public void registerAll() {
         new CommandTree("cptl")
@@ -24,10 +25,15 @@ public class CommandManager {
                         .then(new IntegerArgument("radius", 100, 512)
                                 .then(new IntegerArgument("startTime", 0)
                                         .then(new IntegerArgument("endTime", 0)
-                                                .executesPlayer((player, args) -> {
-                                                    player.sendMessage("started " + args);
-                                                    player.sendMessage(String.valueOf(System.currentTimeMillis() / 1000L));
-                                                })))))
+                                                .then(new IntegerArgument("interval", 0)
+                                                    .executesPlayer((player, args) -> {
+                                                        player.sendMessage("started " + args);
+                                                        player.sendMessage(String.valueOf(System.currentTimeMillis() / 1000L));
+
+                                                        for (int i = (int) args.get("startTime"); i < (int) args.get("endTime"); i += (int) args.get("interval")) {
+                                                            player.sendMessage(String.valueOf(i));
+                                                        }
+                                                    }))))))
                 .then(new LiteralArgument("stop")
                         .executesPlayer((player, args) -> {
                             player.sendMessage("stopped " + args);
