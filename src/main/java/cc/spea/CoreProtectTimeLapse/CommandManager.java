@@ -15,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static cc.spea.CoreProtectTimeLapse.Helpers.sendFancy;
 import static org.bukkit.Bukkit.getServer;
 
 public class CommandManager {
@@ -24,7 +25,7 @@ public class CommandManager {
         this.plugin = plugin;
         this.api = getCoreProtect();
     }
-    private Thread rollbackThread;
+    private InterruptableThread rollbackThread;
     private Thread undoThread;
     ArrayList<long[]> rolledBack = new ArrayList<>();
     int lastRadius = -1;
@@ -42,23 +43,23 @@ public class CommandManager {
                                 .then(new LocationArgument("center", LocationType.BLOCK_POSITION)
                                     .executesPlayer((player, args) -> {
                                         if (undoThread != null && undoThread.isAlive()) {
-                                            player.sendMessage("Undo in progress. You must wait for this to finish.");
+                                            sendFancy(player, "Undo in progress. You must wait for this to finish.");
                                             return;
                                         }
                                         if (rollbackThread != null && rollbackThread.isAlive()) {
-                                            player.sendMessage("Ummmm the thread is already running you bozo");
+                                            sendFancy(player, "Timelapse in progress. To stop it, use the `/cptl stop` command.");
                                             return;
                                         }
 
                                         lastRadius = (int) args.get("radius");
                                         lastLocation = (Location) args.get("center");
 
-                                        rollbackThread = new Thread(() -> {
+                                        rollbackThread = new InterruptableThread(() -> {
                                             BossBar bossBar = Bukkit.createBossBar("Timelapse", BarColor.GREEN, BarStyle.SEGMENTED_10);
                                             bossBar.addPlayer(player);
                                             bossBar.setProgress(0);
 
-                                            player.sendMessage("Running initial rollback.");
+                                            sendFancy(player, "Running initial rollback...");
                                             rolledBack.clear();
 
                                             long currentTime = System.currentTimeMillis() / 1000L;
@@ -72,11 +73,17 @@ public class CommandManager {
                                             api.performRollback(endTime, currentTime, null, null, null, null, null, (int) args.get("radius"), (Location) args.get("center"));
                                             rolledBack.add(new long[]{endTime, currentTime});
 
-                                            player.sendMessage("Now stepping through your interval.");
+                                            if (rollbackThread.getInterrupt()) {
+                                                sendFancy(player, "Stopped job. Run `/cptl undo` to undo those changes.");
+                                                bossBar.removeAll();
+                                                return;
+                                            }
+
+                                            sendFancy(player, "Now stepping through your interval...");
 
                                             for (long i = endTime; i >= startTime; i -= (int) args.get("interval")) {
-                                                if (Thread.currentThread().isInterrupted()) {
-                                                    player.sendMessage("Stopped job. Run `/cptl undo` to undo those changes.");
+                                                if (rollbackThread.getInterrupt()) {
+                                                    sendFancy(player, "Stopped job. Run `/cptl undo` to undo those changes.");
                                                     bossBar.removeAll();
                                                     return;
                                                 }
@@ -84,7 +91,7 @@ public class CommandManager {
                                                 api.performRollback(i - (int) args.get("interval"), i, null, null, null, null, null, (int) args.get("radius"), (Location) args.get("center"));
                                                 rolledBack.add(new long[]{i - (int) args.get("interval"), i});
                                             }
-                                            player.sendMessage("Job finished! Run `/cptl undo` to undo those changes.");
+                                            sendFancy(player, "Job finished! Run `/cptl undo` to undo those changes.");
                                             bossBar.removeAll();
                                         });
 
@@ -94,23 +101,24 @@ public class CommandManager {
             .then(new LiteralArgument("stop")
                 .executesPlayer((player, args) -> {
                     if (rollbackThread == null || !rollbackThread.isAlive()) {
-                        player.sendMessage("There is no running timelapse.");
+                        sendFancy(player, "There is no running timelapse.");
                         return;
                     }
-                    rollbackThread.interrupt();
+                    sendFancy(player, "Stopping as soon as possible, please wait...");
+                    rollbackThread.setInterrupt(true);
                 }))
             .then(new LiteralArgument("undo")
                 .executesPlayer((player, args) -> {
                     if (rollbackThread != null && rollbackThread.isAlive()) {
-                        player.sendMessage("Timelapse in progress.");
+                        sendFancy(player, "Timelapse in progress.");
                         return;
                     }
                     if (undoThread != null && undoThread.isAlive()) {
-                        player.sendMessage("Undo in progress. You must wait for this to finish.");
+                        sendFancy(player, "Undo in progress. You must wait for this to finish.");
                         return;
                     }
                     if (rolledBack.isEmpty()) {
-                        player.sendMessage("Nothing to undo.");
+                        sendFancy(player, "Nothing to undo.");
                         return;
                     }
 
@@ -118,7 +126,8 @@ public class CommandManager {
                         Collections.reverse(rolledBack);
                         int i = 1;
 
-                        BossBar bossBar = Bukkit.createBossBar("Timelapse", BarColor.GREEN, BarStyle.SEGMENTED_10);
+                        sendFancy(player, "Starting undo. Please do not reload or stop the server.");
+                        BossBar bossBar = Bukkit.createBossBar("Undo", BarColor.RED, BarStyle.SEGMENTED_10);
                         bossBar.addPlayer(player);
 
                         bossBar.setProgress(0);
@@ -128,15 +137,13 @@ public class CommandManager {
                             i++;
                         }
                         rolledBack.clear();
-                        player.sendMessage("Undo complete!");
+                        sendFancy(player, "Undo complete!");
                         bossBar.removeAll();
                     });
 
                     undoThread.start();
 
                     // TODO: Handle vine, decay, water flow, fire
-                    // TODO: Make more helpful messages
-                    // TODO: /cptl stop does not work
                     // TODO: Add a way to do min and max time found in database
                 }))
             .register();
