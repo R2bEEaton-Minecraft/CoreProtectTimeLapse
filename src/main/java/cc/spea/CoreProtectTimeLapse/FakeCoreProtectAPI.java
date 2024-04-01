@@ -25,6 +25,13 @@ public class FakeCoreProtectAPI {
         return null;
     }
 
+    public List<String[]> performRestore(long startTime, long endTime, List<String> restrictUsers, List<String> excludeUsers, List<Object> restrictBlocks, List<Object> excludeBlocks, List<Integer> actionList, int radius, Location radiusLocation) {
+        if (Config.getGlobal().API_ENABLED) {
+            return processData(startTime, endTime, radius, radiusLocation, parseList(restrictBlocks), parseList(excludeBlocks), restrictUsers, excludeUsers, actionList, 1, 2, -1, -1, false);
+        }
+        return null;
+    }
+
     public boolean isEnabled() {
         return Config.getGlobal().API_ENABLED;
     }
@@ -69,7 +76,7 @@ public class FakeCoreProtectAPI {
         }
 
         List<Object> restrictBlocks = new ArrayList<>(restrictBlocksMap.keySet());
-        if (actionList.size() == 0 && restrictBlocks.size() > 0) {
+        if (actionList.isEmpty() && !restrictBlocks.isEmpty()) {
             boolean addedMaterial = false;
             boolean addedEntity = false;
 
@@ -86,7 +93,7 @@ public class FakeCoreProtectAPI {
             }
         }
 
-        if (actionList.size() == 0) {
+        if (actionList.isEmpty()) {
             actionList.add(0);
             actionList.add(1);
         }
@@ -112,15 +119,7 @@ public class FakeCoreProtectAPI {
         try (Connection connection = Database.getConnection(false, 1000)) {
             if (connection != null) {
                 Statement statement = connection.createStatement();
-                boolean restrictWorld = false;
-
-                if (radius > 0) {
-                    restrictWorld = true;
-                }
-
-                if (location == null) {
-                    restrictWorld = false;
-                }
+                boolean restrictWorld = radius > 0;
 
                 Integer[] argRadius = null;
                 if (location != null && radius > 0) {

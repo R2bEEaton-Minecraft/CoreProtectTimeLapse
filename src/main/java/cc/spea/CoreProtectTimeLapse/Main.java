@@ -6,8 +6,6 @@ import dev.jorel.commandapi.CommandAPILogger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-
 public class Main extends JavaPlugin {
     @Override
     public void onLoad() {
@@ -16,13 +14,9 @@ public class Main extends JavaPlugin {
 
         // Load the CommandAPI
         CommandAPI.onLoad(
-                // Configure the CommandAPI
-                new CommandAPIBukkitConfig(this)
-                        // Turn on verbose output for command registration logs
-                        .verboseOutput(true)
-                        // Give file where Brigadier's command registration tree should be dumped
-                        .dispatcherFile(new File(getDataFolder(), "command_registration.json"))
-                        .shouldHookPaperReload(true)
+            // Configure the CommandAPI
+            new CommandAPIBukkitConfig(this)
+                .shouldHookPaperReload(true)
         );
     }
 
