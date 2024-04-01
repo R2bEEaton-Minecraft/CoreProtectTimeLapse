@@ -134,9 +134,10 @@ public class CommandManager {
 
                     undoThread.start();
 
-                    // TODO: Handle #vine, #decay, water flow
+                    // TODO: Handle vine, decay, water flow, fire
                     // TODO: Make more helpful messages
                     // TODO: /cptl stop does not work
+                    // TODO: Add a way to do min and max time found in database
                 }))
             .register();
     }
