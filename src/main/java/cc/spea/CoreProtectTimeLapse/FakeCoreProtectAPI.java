@@ -18,9 +18,16 @@ import java.util.List;
 import java.util.Map;
 
 public class FakeCoreProtectAPI {
-    public List<String[]> performRollback(int time, int interval, List<String> restrictUsers, List<String> excludeUsers, List<Object> restrictBlocks, List<Object> excludeBlocks, List<Integer> actionList, int radius, Location radiusLocation) {
+    public List<String[]> performRollback(long startTime, long endTime, List<String> restrictUsers, List<String> excludeUsers, List<Object> restrictBlocks, List<Object> excludeBlocks, List<Integer> actionList, int radius, Location radiusLocation) {
         if (Config.getGlobal().API_ENABLED) {
-            return processData(time, radius, radiusLocation, parseList(restrictBlocks), parseList(excludeBlocks), restrictUsers, excludeUsers, actionList, 0, 2, -1, -1, false, interval);
+            return processData(startTime, endTime, radius, radiusLocation, parseList(restrictBlocks), parseList(excludeBlocks), restrictUsers, excludeUsers, actionList, 0, 2, -1, -1, false);
+        }
+        return null;
+    }
+
+    public List<String[]> performRestore(long startTime, long endTime, List<String> restrictUsers, List<String> excludeUsers, List<Object> restrictBlocks, List<Object> excludeBlocks, List<Integer> actionList, int radius, Location radiusLocation) {
+        if (Config.getGlobal().API_ENABLED) {
+            return processData(startTime, endTime, radius, radiusLocation, parseList(restrictBlocks), parseList(excludeBlocks), restrictUsers, excludeUsers, actionList, 1, 2, -1, -1, false);
         }
         return null;
     }
@@ -51,7 +58,7 @@ public class FakeCoreProtectAPI {
         return result;
     }
 
-    private List<String[]> processData(int time, int radius, Location location, Map<Object, Boolean> restrictBlocksMap, Map<Object, Boolean> excludeBlocks, List<String> restrictUsers, List<String> excludeUsers, List<Integer> actionList, int action, int lookup, int offset, int rowCount, boolean useLimit, int interval) {
+    private List<String[]> processData(long startTime, long endTime, int radius, Location location, Map<Object, Boolean> restrictBlocksMap, Map<Object, Boolean> excludeBlocks, List<String> restrictUsers, List<String> excludeUsers, List<Integer> actionList, int action, int lookup, int offset, int rowCount, boolean useLimit) {
         // You need to either specify time/radius or time/user
         List<String[]> result = new ArrayList<>();
         List<String> uuids = new ArrayList<>();
@@ -69,7 +76,7 @@ public class FakeCoreProtectAPI {
         }
 
         List<Object> restrictBlocks = new ArrayList<>(restrictBlocksMap.keySet());
-        if (actionList.size() == 0 && restrictBlocks.size() > 0) {
+        if (actionList.isEmpty() && !restrictBlocks.isEmpty()) {
             boolean addedMaterial = false;
             boolean addedEntity = false;
 
@@ -86,20 +93,16 @@ public class FakeCoreProtectAPI {
             }
         }
 
-        if (actionList.size() == 0) {
+        if (actionList.isEmpty()) {
             actionList.add(0);
             actionList.add(1);
         }
 
         actionList.removeIf(actionListItem -> actionListItem > 3);
 
-        if (restrictUsers.size() == 0) {
+        if (restrictUsers.isEmpty()) {
             restrictUsers.add("#global");
         }
-
-        long timestamp = System.currentTimeMillis() / 1000L;
-        long startTime = timestamp - time - interval;
-        long endTime = timestamp - time;
 
         if (radius < 1) {
             radius = -1;
@@ -116,15 +119,7 @@ public class FakeCoreProtectAPI {
         try (Connection connection = Database.getConnection(false, 1000)) {
             if (connection != null) {
                 Statement statement = connection.createStatement();
-                boolean restrictWorld = false;
-
-                if (radius > 0) {
-                    restrictWorld = true;
-                }
-
-                if (location == null) {
-                    restrictWorld = false;
-                }
+                boolean restrictWorld = radius > 0;
 
                 Integer[] argRadius = null;
                 if (location != null && radius > 0) {

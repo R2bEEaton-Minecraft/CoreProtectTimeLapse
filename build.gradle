@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group = 'cc.spea.CoreProtectTimeLapse'
@@ -10,6 +11,8 @@ repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     maven { url 'https://maven.playpro.com/' }
+
+    maven { url = "https://repo.codemc.org/repository/maven-public/" }
 }
 
 dependencies {
@@ -17,6 +20,17 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     compileOnly 'org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT'
     compileOnly ('net.coreprotect:coreprotect:21.0'){ transitive = false}
+
+    implementation "dev.jorel:commandapi-bukkit-shade:9.3.0"
+}
+
+shadowJar {
+    dependencies {
+        include dependency("dev.jorel:commandapi-bukkit-shade:9.3.0")
+    }
+
+    // TODO: Change this to my own package name
+    relocate("dev.jorel.commandapi", "cc.spea.CoreProtectTimeLapse.commandapi")
 }
 
 test {

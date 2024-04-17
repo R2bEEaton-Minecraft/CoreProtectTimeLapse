@@ -1,27 +1,48 @@
 package cc.spea.CoreProtectTimeLapse;
 
-import net.coreprotect.database.Rollback;
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPIBukkitConfig;
+import dev.jorel.commandapi.CommandAPILogger;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import net.coreprotect.CoreProtect;
-import net.coreprotect.CoreProtectAPI;
-
-import java.util.ArrayList;
-import java.util.Objects;
 
 public class Main extends JavaPlugin {
     @Override
-    public void onEnable() {
-        Bukkit.broadcastMessage("CoreProtectTimeLapse enabled.");
+    public void onLoad() {
+        // Set CommandAPI to use this plugin's logger
+        CommandAPI.setLogger(CommandAPILogger.fromJavaLogger(getLogger()));
 
-        Objects.requireNonNull(getCommand("cptl")).setExecutor(new CommandManager(this));
-        Objects.requireNonNull(getCommand("cptl")).setTabCompleter(new CommandManager(this));
+        // Load the CommandAPI
+        CommandAPI.onLoad(
+            // Configure the CommandAPI
+            new CommandAPIBukkitConfig(this)
+                .shouldHookPaperReload(true)
+        );
+    }
+
+    @Override
+    public void onEnable() {
+        CommandAPI.onEnable();
+
+        CommandManager cm = new CommandManager(this);
+        cm.registerAll();
+
+        // TODO:
+        // Fix entities, tile entities
+        // Look into decay, water spread, etc.
+        // Change start time and end time to absolute times
+        // Stop tick speed
+        // Custom radius
+        // Allow undo at the end
+        // Get list of affected regions for backup restore purposes
+
+        // api.performRollback(i, 60, null, null, null, null, null, 512, Bukkit.getWorlds().get(0).getSpawnLocation());
+
+        Bukkit.broadcastMessage("CoreProtectTimeLapse enabled.");
     }
 
     @Override
     public void onDisable() {
-
+        CommandAPI.onDisable();
     }
 }
