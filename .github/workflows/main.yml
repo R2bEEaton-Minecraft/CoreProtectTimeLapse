@@ -51,7 +51,7 @@ jobs:
         with:
           token: ${{ secrets.MODRINTH_TOKEN }}
           project: 64UYguZE
-          file: build/libs/*.jar
+          file: build/libs/CoreProtectTimeLapse-1.0.0.jar
           changelog: ${{ github.event.release.body }}
           loaders: paper, spigot
           api-domain: api.modrinth.com
