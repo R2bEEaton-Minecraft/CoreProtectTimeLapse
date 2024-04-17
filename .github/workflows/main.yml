@@ -35,20 +35,23 @@ jobs:
         uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
       - name: Build with Gradle Wrapper
-        run: ./gradlew build
+        run: ./gradlew -Pversion={{ github.event.release.tag_name }} build
 
-      - uses: Kir-Antipov/mc-publish@v3.3
+      # An optional step to also upload the `.jar` to the GitHub release assets
+      - name: Upload to release
+        uses: JasonEtco/upload-to-release@master
         with:
-          # Only include this section if you wish to publish
-          # your assets on Modrinth.
-          modrinth-id: 64UYguZE
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          # Make sure that this matches the file name of your .jar
+          args: build/libs/*.jar application/java-archive
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 
-          # Only include this section if you wish to publish
-          # your assets on CurseForge.
-          # curseforge-id: 394468
-          # curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-
-          # Only include this section if you wish to publish
-          # your assets on GitHub.
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload to Modrinth
+        uses: cloudnode-pro/modrinth-publish@1.0.0
+        with:
+          token: ${{ secrets.MODRINTH_TOKEN }}
+          project: 64UYguZE
+          file: build/libs/*.jar
+          changelog: ${{ github.event.release.body }}
+          loaders: paper, spigot
+          api-domain: api.modrinth.com

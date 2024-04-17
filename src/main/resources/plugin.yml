@@ -8,8 +8,6 @@ author: R2bEEaton
 website: spea.cc
 prefix: CoreProtectTimeLapse
 depend: [CoreProtect]
-mc-publish:
-  modrinth-loaders: [bukkit, spigot, paper]
 commands:
   cptl:
     description: Control CPTL
