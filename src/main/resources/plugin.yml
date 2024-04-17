@@ -9,7 +9,7 @@ website: spea.cc
 prefix: CoreProtectTimeLapse
 depend: [CoreProtect]
 mc-publish:
-  loaders: [bukkit, spigot, paper]
+  modrinth-loaders: [bukkit, spigot, paper]
 commands:
   cptl:
     description: Control CPTL
