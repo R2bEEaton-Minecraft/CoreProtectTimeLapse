@@ -1,0 +1,5 @@
+site_name: CoreProtect Time-Lapse Docs
+theme: readthedocs
+repo_url: https://github.com/R2bEEaton-Minecraft/CoreProtectTimeLapse
+extra_css:
+  - css/css.css
