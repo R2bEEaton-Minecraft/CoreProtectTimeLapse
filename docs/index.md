@@ -12,7 +12,7 @@ This tool is best used with [ReplayMod](https://modrinth.com/mod/replaymod/) and
 Created using CPTL and ReplayMod.
 
 # Links
-| URL                   | Description                                    |
-|-----------------------|------------------------------------------------|
-| [Commands](/commands) | List and description of commands.              |
-| [Usage](/usage)       | Start-to-finish description and use of plugin. |
+| URL                    | Description                                    |
+|------------------------|------------------------------------------------|
+| [Commands](./commands) | List and description of commands.              |
+| [Usage](./usage)       | Start-to-finish description and use of plugin. |

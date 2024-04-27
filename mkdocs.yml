@@ -3,3 +3,8 @@ theme: readthedocs
 repo_url: https://github.com/R2bEEaton-Minecraft/CoreProtectTimeLapse
 extra_css:
   - css/css.css
+nav:
+  - Welcome to CPTL Docs: index.md
+  - Commands: commands.md
+  - Full Usage Guide: usage.md
+  - Donate: donate.md
