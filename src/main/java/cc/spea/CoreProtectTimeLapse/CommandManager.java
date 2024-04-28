@@ -35,6 +35,26 @@ public class CommandManager {
         new CommandTree("cptl")
             .withPermission(CommandPermission.OP)
             .withAliases("coreprotecttimelapse")
+            .then(new LiteralArgument("setup")
+                .executesPlayer((player, args) -> {
+                    Bukkit.dispatchCommand(player, "gamerule randomTickSpeed 1000");
+                    Bukkit.dispatchCommand(player, "gamerule doTileDrops false");
+                    Bukkit.dispatchCommand(player, "gamerule doFireTick false");
+                    Bukkit.dispatchCommand(player, "gamerule doEntityDrops false");
+                    Bukkit.dispatchCommand(player, "gamerule doMobSpawning false");
+                    Bukkit.dispatchCommand(player, "gamerule doPatrolSpawning false");
+                    Bukkit.dispatchCommand(player, "gamerule doTraderSpawning false");
+                    Bukkit.dispatchCommand(player, "gamerule doWeatherCycle false");
+                    Bukkit.dispatchCommand(player, "gamerule doMobLoot false");
+                    Bukkit.dispatchCommand(player, "gamerule tntExplodes false");
+                    Bukkit.dispatchCommand(player, "kill @e[type=!player]");
+                    Bukkit.dispatchCommand(player, "kill @e[type=!player]");
+                    Bukkit.dispatchCommand(player, "kill @e[type=!player]");
+                    Bukkit.dispatchCommand(player, "kill @e[type=!player]");
+                    Bukkit.dispatchCommand(player, "time set 0");
+                    Bukkit.dispatchCommand(player, "weather clear");
+                    sendFancy(player, "Setup complete.");
+                }))
             .then(new LiteralArgument("start")
                 .then(new IntegerArgument("radius", 100, 512)
                     .then(new LongArgument("startTime", 0)
