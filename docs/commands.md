@@ -14,6 +14,8 @@ This command will start the timelapse, so make sure you have ReplayMod or your r
 - Interval (in seconds) is the duration of time between each timelapse snapshot. So, for example, if you enter 3600 (one hour), that means that the plugin will step through your block history, showing the world as it existed at hour 0, hour 1, hour 2, etc. between `startTime` and `endTime`.
 - Center is the XYZ coordinate of the center of this radius. You can enter `~ ~ ~` if you want it to be the location of the current player.
 
+When this is run, the server will roll back to your desired `endTime` and then continue moving backward every `interval` seconds until the `startTime`.
+
 ## Stop
 ```
 /cptl stop
