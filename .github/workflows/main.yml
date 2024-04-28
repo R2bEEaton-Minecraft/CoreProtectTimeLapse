@@ -41,7 +41,7 @@ jobs:
         uses: JasonEtco/upload-to-release@master
         with:
           # Make sure that this matches the file name of your .jar
-          args: build/libs/CoreProtectTimeLapse-1.0.0.jar application/java-archive
+          args: build/libs/*.jar application/java-archive
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 
