@@ -5,6 +5,8 @@
 /cptl setup
 ```
 
+**⚠️ WARNING! ⚠️:** This is a destructive process, please either make a backup or ONLY run this on a backup!
+
 This is not a necessary command, but performs a series of helpful other commands that can make the time-lapse look better.
 Currently, it runs:
 
