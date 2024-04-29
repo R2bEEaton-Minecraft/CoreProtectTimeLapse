@@ -27,16 +27,12 @@ public class Main extends JavaPlugin {
         CommandManager cm = new CommandManager(this);
         cm.registerAll();
 
+        getServer().getPluginManager().registerEvents(new Listeners(), this);
+
         // TODO:
-        // Fix entities, tile entities
         // Look into decay, water spread, etc.
         // Change start time and end time to absolute times
-        // Stop tick speed
-        // Custom radius
-        // Allow undo at the end
         // Get list of affected regions for backup restore purposes
-
-        // api.performRollback(i, 60, null, null, null, null, null, 512, Bukkit.getWorlds().get(0).getSpawnLocation());
 
         Bukkit.broadcastMessage("CoreProtectTimeLapse enabled.");
     }

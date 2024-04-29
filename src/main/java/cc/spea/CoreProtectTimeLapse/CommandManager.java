@@ -51,6 +51,7 @@ public class CommandManager {
                     Bukkit.dispatchCommand(player, "kill @e[type=!player]");
                     Bukkit.dispatchCommand(player, "kill @e[type=!player]");
                     Bukkit.dispatchCommand(player, "kill @e[type=!player]");
+                    Bukkit.dispatchCommand(player, "say Natural tree growth is always disabled with CPTL.");
                     Bukkit.dispatchCommand(player, "time set 0");
                     Bukkit.dispatchCommand(player, "weather clear");
                     sendFancy(player, "Setup complete.");

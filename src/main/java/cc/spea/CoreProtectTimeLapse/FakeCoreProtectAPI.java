@@ -12,10 +12,7 @@ import org.bukkit.entity.EntityType;
 
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FakeCoreProtectAPI {
     public List<String[]> performRollback(long startTime, long endTime, List<String> restrictUsers, List<String> excludeUsers, List<Object> restrictBlocks, List<Object> excludeBlocks, List<Integer> actionList, int radius, Location radiusLocation) {
@@ -155,6 +152,13 @@ public class FakeCoreProtectAPI {
         catch (Exception e) {
             e.printStackTrace();
         }
+
+// TODO: Fix undo dirt? CoreProtect doesn't log grass spreading
+//        for (String[] s : result) {
+//            if (s[12].equalsIgnoreCase("minecraft:dirt") && location != null) {
+//                Objects.requireNonNull(location.getWorld()).getBlockAt(Integer.parseInt(s[2]), Integer.parseInt(s[3]), Integer.parseInt(s[4])).setType(Material.GRASS_BLOCK);
+//            }
+//        }
 
         return result;
     }
