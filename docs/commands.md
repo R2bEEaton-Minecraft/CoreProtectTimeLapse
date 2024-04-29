@@ -1,5 +1,30 @@
 # Commands
 
+## Setup
+```
+/cptl setup
+```
+
+This is not a necessary command, but performs a series of helpful other commands that can make the time-lapse look better.
+Currently, it runs:
+
+- gamerule randomTickSpeed 1000
+- gamerule doTileDrops false
+- gamerule doFireTick false
+- gamerule doEntityDrops false
+- gamerule doMobSpawning false
+- gamerule doPatrolSpawning false
+- gamerule doTraderSpawning false
+- gamerule doWeatherCycle false
+- gamerule doMobLoot false
+- gamerule tntExplodes false
+- kill @e[type=!player]
+- kill @e[type=!player]
+- kill @e[type=!player]
+- kill @e[type=!player]
+- time set 0
+- weather clear
+
 ## Start
 ```
 /cptl start <radius> <startTime> <endTime> <interval> <center>
