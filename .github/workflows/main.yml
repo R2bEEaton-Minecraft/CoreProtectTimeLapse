@@ -59,7 +59,7 @@ jobs:
         uses: itsmeow/curseforge-upload@v3
         with:
           file_path: "build/libs/CoreProtectTimeLapse-${{ github.event.release.tag_name }}-all.jar"
-          game_endpoint: "minecraft"
+          game_endpoint: "bukkit"
           relations: "coreprotect:requiredDependency"
           game_versions: "Minecraft 1.20:1.20.5,Java 17,Bukkit"
           project_id: "1010725"
