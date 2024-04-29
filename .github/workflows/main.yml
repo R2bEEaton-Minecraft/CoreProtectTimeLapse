@@ -63,4 +63,6 @@ jobs:
           relations: "coreprotect:requiredDependency"
           game_versions: "Minecraft 1.20:1.20.5,Java 17,Bukkit"
           project_id: "1010725"
+          changelog: ${{ github.event.release.body }}
+          changelog_type: markdown
           token: "${{ secrets.CURSEFORGE_TOKEN }}"
