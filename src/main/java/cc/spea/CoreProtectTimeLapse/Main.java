@@ -31,8 +31,11 @@ public class Main extends JavaPlugin {
 
         // TODO:
         // Look into decay, water spread, etc.
-        // Change start time and end time to absolute times
         // Get list of affected regions for backup restore purposes
+
+        // BStats
+        int pluginId = 21753; // <-- Replace with the id of your plugin!
+        Metrics metrics = new Metrics(this, pluginId);
 
         Bukkit.broadcastMessage("CoreProtectTimeLapse enabled.");
     }
