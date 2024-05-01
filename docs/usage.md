@@ -1,5 +1,3 @@
 # Full Usage Guide
 
-![Replace this with a description](https://cdn.modrinth.com/data/cached_images/cd0269a83d6f564abbc08735e2206ebde73d9948.png)
-
-FULL GUIDE COMING SOON
+<iframe width="1259" height="708" src="https://www.youtube.com/embed/87pdEmr7hWw" title="Core Protect Time-Lapse Tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
