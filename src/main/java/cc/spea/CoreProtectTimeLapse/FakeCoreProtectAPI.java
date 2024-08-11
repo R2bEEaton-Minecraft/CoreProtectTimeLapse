@@ -3,7 +3,7 @@ package cc.spea.CoreProtectTimeLapse;
 import net.coreprotect.config.Config;
 import net.coreprotect.database.Database;
 import net.coreprotect.database.Lookup;
-import net.coreprotect.database.Rollback;
+import net.coreprotect.database.rollback.Rollback;
 import net.coreprotect.utility.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

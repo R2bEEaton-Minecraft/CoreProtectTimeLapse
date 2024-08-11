@@ -1,6 +1,6 @@
 main: cc.spea.CoreProtectTimeLapse.Main
 name: CoreProtectTimeLapse
-version: 'v1.0.3'
+version: 'v1.0.4'
 api-version: '1.20'
 description: CoreProtectTimeLapse
 load: POSTWORLD
