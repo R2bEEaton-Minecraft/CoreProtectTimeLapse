@@ -61,7 +61,7 @@ jobs:
           file_path: "build/libs/CoreProtectTimeLapse-${{ github.event.release.tag_name }}-all.jar"
           game_endpoint: "bukkit"
           relations: "coreprotect:requiredDependency"
-          game_versions: "Minecraft 1.20,Java 17,Bukkit"
+          game_versions: "Minecraft 1.21,Java 17,Bukkit"
           project_id: "1010725"
           changelog: ${{ github.event.release.body }}
           changelog_type: markdown
