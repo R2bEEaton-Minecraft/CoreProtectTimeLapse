@@ -1,5 +1,7 @@
 # Commands
 
+**⚠️ WARNING! ⚠️:**  Beforeyou can run any commands, you must first acknowledge the destructive properties of this plugin by changing the setting in `plugins/CoreProtectTimeLapse/config.yml` to `true`. ONLY run this on a backup of the world or where you don't care if the server gets destroyed. After replaying the world logs, sometimes mistakes get made when undo-ing. This is due to CoreProtect's way of saving certain things. Please make a backup of the entire server, including the CoreProtect database, and run this plugin on that instead. 
+
 ## Setup
 ```
 /cptl setup
