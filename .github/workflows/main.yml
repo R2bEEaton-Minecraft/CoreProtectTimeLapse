@@ -9,6 +9,7 @@ name: Java CI with Gradle
 permissions: write-all
 
 on:
+  workflow_dispatch:
   release:
     types: [ published ]
 jobs:
