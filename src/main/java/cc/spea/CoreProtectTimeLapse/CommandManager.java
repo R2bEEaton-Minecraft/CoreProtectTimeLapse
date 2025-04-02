@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,10 +21,12 @@ import static org.bukkit.Bukkit.getServer;
 
 public class CommandManager {
     JavaPlugin plugin;
+    FileConfiguration config;
     FakeCoreProtectAPI api;
-    public CommandManager(JavaPlugin plugin) {
+    public CommandManager(JavaPlugin plugin, FileConfiguration config) {
         this.plugin = plugin;
         this.api = getCoreProtect();
+        this.config = config;
     }
     private InterruptableThread rollbackThread;
     private Thread undoThread;
@@ -32,8 +35,18 @@ public class CommandManager {
     Location lastLocation = null;
 
     public void registerAll() {
+        if (!config.getBoolean("acknowledgesDestruction")) {
+            new CommandTree("cptl")
+                .withAliases("coreprotecttimelapse")
+                .executes((executor, types) -> {
+                    sendFancy(executor, "Please update the config file in your plugins/CoreProtectTimeLapse folder to acknowledge the " +
+                            "destructive ability of this plugin. ONLY run this plugin on a backup! Restart or reload " +
+                            "when the config has been updated.");
+                });
+            return;
+        }
+
         new CommandTree("cptl")
-            .withPermission(CommandPermission.OP)
             .withAliases("coreprotecttimelapse")
             .then(new LiteralArgument("setup")
                 .executesPlayer((player, args) -> {

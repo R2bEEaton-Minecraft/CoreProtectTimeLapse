@@ -4,9 +4,12 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import dev.jorel.commandapi.CommandAPILogger;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
+    FileConfiguration config = getConfig();
+
     @Override
     public void onLoad() {
         // Set CommandAPI to use this plugin's logger
@@ -24,7 +27,9 @@ public class Main extends JavaPlugin {
     public void onEnable() {
         CommandAPI.onEnable();
 
-        CommandManager cm = new CommandManager(this);
+        saveDefaultConfig();
+
+        CommandManager cm = new CommandManager(this, config);
         cm.registerAll();
 
         getServer().getPluginManager().registerEvents(new Listeners(), this);

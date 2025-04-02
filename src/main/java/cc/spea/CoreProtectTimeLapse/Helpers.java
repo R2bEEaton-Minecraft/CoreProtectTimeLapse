@@ -1,10 +1,10 @@
 package cc.spea.CoreProtectTimeLapse;
 
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 public class Helpers {
-    public static void sendFancy(Player p, String s) {
-        p.sendMessage("[" + ChatColor.RED + "CPTL" + ChatColor.RESET + "] " + s);
+    public static void sendFancy(CommandSender ce, String s) {
+        ce.sendMessage ("[" + ChatColor.RED + "CPTL" + ChatColor.RESET + "] " + s);
     }
 }
