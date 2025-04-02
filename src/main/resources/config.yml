@@ -1,0 +1,4 @@
+# Update the following line from "false" to "true" to acknowledge the destructive ability of this plugin
+# ONLY run this plugin on a backup or a copy of the server you are willing to potentially destroy
+# By changing this to "true" you will enable the functionality of this plugin after a restart / reload
+acknowledgesDestruction: false

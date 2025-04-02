@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'cc.spea.CoreProtectTimeLapse'
-version = 'v1.0.3'
+version = 'v1.0.4'
 
 repositories {
     mavenCentral()
@@ -29,7 +29,6 @@ shadowJar {
         include dependency("dev.jorel:commandapi-bukkit-shade:9.3.0")
     }
 
-    // TODO: Change this to my own package name
     relocate("dev.jorel.commandapi", "cc.spea.CoreProtectTimeLapse.commandapi")
 }
 
