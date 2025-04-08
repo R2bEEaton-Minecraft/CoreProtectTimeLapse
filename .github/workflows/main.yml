@@ -47,14 +47,19 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 
       - name: Upload to Modrinth
-        uses: cloudnode-pro/modrinth-publish@1.0.0
+        uses: cloudnode-pro/modrinth-publish@v2
         with:
           token: ${{ secrets.MODRINTH_TOKEN }}
           project: 64UYguZE
-          file: build/libs/CoreProtectTimeLapse-${{ github.event.release.tag_name }}-all.jar
+          name: ${{ github.event.release.name }}
+          version: ${{ github.event.release.tag_name }}
           changelog: ${{ github.event.release.body }}
-          loaders: paper, spigot
-          api-domain: api.modrinth.com
+          loaders: |-
+            paper
+            spigot
+          game-versions: |-
+            1.21.x
+          files: build/libs/CoreProtectTimeLapse-${{ github.event.release.tag_name }}-all.jar
 
       - name: "Upload to CurseForge"
         uses: itsmeow/curseforge-upload@v3
