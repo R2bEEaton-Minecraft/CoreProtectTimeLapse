@@ -1,9 +1,9 @@
 package cc.spea.CoreProtectTimeLapse;
 
-import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.CommandTree;
 import dev.jorel.commandapi.arguments.*;
 import net.coreprotect.CoreProtect;
+import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
@@ -22,7 +22,7 @@ import static org.bukkit.Bukkit.getServer;
 public class CommandManager {
     JavaPlugin plugin;
     FileConfiguration config;
-    FakeCoreProtectAPI api;
+    CoreProtectAPI api;
     public CommandManager(JavaPlugin plugin, FileConfiguration config) {
         this.plugin = plugin;
         this.api = getCoreProtect();
@@ -30,7 +30,7 @@ public class CommandManager {
     }
     private InterruptableThread rollbackThread;
     private Thread undoThread;
-    ArrayList<long[]> rolledBack = new ArrayList<>();
+    ArrayList<Integer> rollbackDepths = new ArrayList<>();
     int lastRadius = -1;
     Location lastLocation = null;
 
@@ -73,9 +73,13 @@ public class CommandManager {
                 .then(new IntegerArgument("radius", 100, 512)
                     .then(new LongArgument("startTime", 0)
                         .then(new LongArgument("endTime", 0)
-                            .then(new IntegerArgument("interval", 0)
+                            .then(new IntegerArgument("interval", 1)
                                 .then(new LocationArgument("center", LocationType.BLOCK_POSITION)
                                     .executesPlayer((player, args) -> {
+                                        if (api == null) {
+                                            sendFancy(player, "CoreProtect API is unavailable or too old (requires API v11+).");
+                                            return;
+                                        }
                                         if (undoThread != null && undoThread.isAlive()) {
                                             sendFancy(player, "Undo in progress. You must wait for this to finish.");
                                             return;
@@ -94,7 +98,7 @@ public class CommandManager {
                                             bossBar.setProgress(0);
 
                                             sendFancy(player, "Running initial rollback...");
-                                            rolledBack.clear();
+                                            rollbackDepths.clear();
 
                                             long currentTime = System.currentTimeMillis() / 1000L;
                                             long startTime = (long) args.get("startTime");
@@ -104,8 +108,9 @@ public class CommandManager {
                                                 long temp = startTime; startTime = endTime; endTime = temp;
                                             }
 
-                                            api.performRollback(endTime, currentTime, null, null, null, null, null, (int) args.get("radius"), (Location) args.get("center"));
-                                            rolledBack.add(new long[]{endTime, currentTime});
+                                            int initialRollbackDepth = toRollbackDepth(endTime, currentTime);
+                                            api.performRollback(initialRollbackDepth, null, null, null, null, null, (int) args.get("radius"), (Location) args.get("center"));
+                                            rollbackDepths.add(initialRollbackDepth);
 
                                             if (rollbackThread.getInterrupt()) {
                                                 sendFancy(player, "Stopped job. Run `/cptl undo` to undo those changes.");
@@ -115,15 +120,28 @@ public class CommandManager {
 
                                             sendFancy(player, "Now stepping through your interval...");
 
-                                            for (long i = endTime; i >= startTime; i -= (int) args.get("interval")) {
+                                            int interval = (int) args.get("interval");
+                                            long cursor = endTime;
+                                            while (cursor > startTime) {
                                                 if (rollbackThread.getInterrupt()) {
                                                     sendFancy(player, "Stopped job. Run `/cptl undo` to undo those changes.");
                                                     bossBar.removeAll();
                                                     return;
                                                 }
-                                                bossBar.setProgress((double)(endTime - i) / (double)(endTime - startTime));
-                                                api.performRollback(i - (int) args.get("interval"), i, null, null, null, null, null, (int) args.get("radius"), (Location) args.get("center"));
-                                                rolledBack.add(new long[]{i - (int) args.get("interval"), i});
+
+                                                long nextCursor = Math.max(startTime, cursor - interval);
+                                                int rollbackDepth = toRollbackDepth(nextCursor, currentTime);
+
+                                                api.performRollback(rollbackDepth, null, null, null, null, null, (int) args.get("radius"), (Location) args.get("center"));
+                                                rollbackDepths.add(rollbackDepth);
+
+                                                if (endTime == startTime) {
+                                                    bossBar.setProgress(1);
+                                                } else {
+                                                    bossBar.setProgress((double) (endTime - nextCursor) / (double) (endTime - startTime));
+                                                }
+
+                                                cursor = nextCursor;
                                             }
                                             sendFancy(player, "Job finished! Run `/cptl undo` to undo those changes.");
                                             bossBar.removeAll();
@@ -151,26 +169,21 @@ public class CommandManager {
                         sendFancy(player, "Undo in progress. You must wait for this to finish.");
                         return;
                     }
-                    if (rolledBack.isEmpty()) {
+                    if (rollbackDepths.isEmpty()) {
                         sendFancy(player, "Nothing to undo.");
                         return;
                     }
 
                     undoThread = new Thread(() -> {
-                        Collections.reverse(rolledBack);
-                        int i = 1;
-
                         sendFancy(player, "Starting undo. Please do not reload or stop the server.");
                         BossBar bossBar = Bukkit.createBossBar("Undo", BarColor.RED, BarStyle.SEGMENTED_10);
                         bossBar.addPlayer(player);
 
                         bossBar.setProgress(0);
-                        for (long[] times : rolledBack) {
-                            api.performRestore(times[0], times[1], null, null, null, null, null, lastRadius, lastLocation);
-                            bossBar.setProgress((double) i / rolledBack.size());
-                            i++;
-                        }
-                        rolledBack.clear();
+                        int maxRollbackDepth = Collections.max(rollbackDepths);
+                        api.performRestore(maxRollbackDepth, null, null, null, null, null, lastRadius, lastLocation);
+                        bossBar.setProgress(1);
+                        rollbackDepths.clear();
                         sendFancy(player, "Undo complete!");
                         bossBar.removeAll();
                     });
@@ -183,25 +196,33 @@ public class CommandManager {
             .register();
     }
 
-    private FakeCoreProtectAPI getCoreProtect() {
+    private CoreProtectAPI getCoreProtect() {
         Plugin plugin = getServer().getPluginManager().getPlugin("CoreProtect");
 
         // Check that CoreProtect is loaded
-        if (!(plugin instanceof CoreProtect)) {
+        if (!(plugin instanceof CoreProtect coreProtectPlugin)) {
             return null;
         }
 
         // Check that the API is enabled
-        FakeCoreProtectAPI CoreProtect = new FakeCoreProtectAPI();
-        if (!CoreProtect.isEnabled()) {
+        CoreProtectAPI coreProtectAPI = coreProtectPlugin.getAPI();
+        if (coreProtectAPI == null || !coreProtectAPI.isEnabled()) {
             return null;
         }
 
-        // Check that a compatible version of the API is loaded
-        if (CoreProtect.APIVersion() < 9) {
+        // CoreProtect API v11+ (CoreProtect 23.1+) is required for modern 1.21.x compatibility
+        if (coreProtectAPI.APIVersion() < 11) {
             return null;
         }
 
-        return CoreProtect;
+        return coreProtectAPI;
+    }
+
+    private int toRollbackDepth(long targetTimestamp, long nowTimestamp) {
+        long rollbackDepth = Math.max(0, nowTimestamp - targetTimestamp);
+        if (rollbackDepth > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        return (int) rollbackDepth;
     }
 }
