@@ -18,15 +18,15 @@ repositories {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    compileOnly 'org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT'
-    compileOnly ('net.coreprotect:coreprotect:22.4'){ transitive = false}
+    compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
+    compileOnly ('net.coreprotect:coreprotect:23.1'){ transitive = false}
 
-    implementation "dev.jorel:commandapi-bukkit-shade:9.7.0"
+    implementation "dev.jorel:commandapi-spigot-shade:11.1.0"
 }
 
 shadowJar {
     dependencies {
-        include dependency("dev.jorel:commandapi-bukkit-shade:9.7.0")
+        include dependency("dev.jorel:commandapi-spigot-shade:11.1.0")
     }
 
     relocate("dev.jorel.commandapi", "cc.spea.CoreProtectTimeLapse.commandapi")
