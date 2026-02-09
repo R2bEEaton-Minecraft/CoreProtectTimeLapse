@@ -6,5 +6,6 @@ extra_css:
 nav:
   - Welcome to CPTL Docs: index.md
   - Commands: commands.md
+  - Compatibility: compatibility.md
   - Full Usage Guide: usage.md
   - Donate: donate.md
