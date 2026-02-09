@@ -4,7 +4,7 @@
 
 Besides using its API, this tool is not affiliated with CoreProtect.
 
-This tool is best used with [ReplayMod](https://modrinth.com/mod/replaymod/) and *requires* [CoreProtect](https://modrinth.com/plugin/coreprotect) to be installed through the entire desired time-lapse period.
+This tool is best used with [ReplayMod](https://modrinth.com/mod/replaymod/) or [Flashback](https://modrinth.com/mod/flashback/) and *requires* [CoreProtect](https://modrinth.com/plugin/coreprotect) to be installed through the entire desired time-lapse period.
 
 # Requirements
 
@@ -23,6 +23,6 @@ Created using CPTL and ReplayMod.
 # Links
 | URL                    | Description                                    |
 |------------------------|------------------------------------------------|
-| [Commands](./commands) | List and description of commands.              |
-| [Compatibility](./compatibility) | Supported versions and startup checks. |
-| [Usage](./usage)       | Start-to-finish description and use of plugin. |
+| [Commands](commands.md) | List and description of commands.              |
+| [Compatibility](compatibility.md) | Supported versions and startup checks. |
+| [Usage](usage.md)       | Start-to-finish description and use of plugin. |

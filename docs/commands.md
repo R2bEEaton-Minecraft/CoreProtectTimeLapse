@@ -38,7 +38,7 @@ Currently, it runs:
 
 **WARNING:** This is a destructive process. Use a backup.
 
-This command will start the timelapse, so make sure you have ReplayMod or your recording software set up.
+This command will start the timelapse, so make sure you have ReplayMod, Flashback, or your recording software set up.
 
 - Radius (in blocks) controls how much area around `center` is included in the timelapse.
 - `startTime` and `endTime` should be entered in POSIX/Unix time. [https://www.epochconverter.com/](https://www.epochconverter.com/)
