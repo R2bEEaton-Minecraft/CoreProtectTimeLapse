@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'cc.spea.CoreProtectTimeLapse'
-version = 'v1.1.0'
+version = '1.2.0'
 
 repositories {
     mavenCentral()
@@ -20,16 +20,6 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
     compileOnly ('net.coreprotect:coreprotect:23.1'){ transitive = false}
-
-    implementation "dev.jorel:commandapi-spigot-shade:11.1.0"
-}
-
-shadowJar {
-    dependencies {
-        include dependency("dev.jorel:commandapi-spigot-shade:11.1.0")
-    }
-
-    relocate("dev.jorel.commandapi", "cc.spea.CoreProtectTimeLapse.commandapi")
 }
 
 test {

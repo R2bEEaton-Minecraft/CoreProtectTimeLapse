@@ -1,8 +1,5 @@
 package cc.spea.CoreProtectTimeLapse;
 
-import dev.jorel.commandapi.CommandAPI;
-import dev.jorel.commandapi.CommandAPILogger;
-import dev.jorel.commandapi.CommandAPISpigotConfig;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
@@ -17,21 +14,7 @@ public class Main extends JavaPlugin {
     FileConfiguration config = getConfig();
 
     @Override
-    public void onLoad() {
-        // Set CommandAPI to use this plugin's logger
-        CommandAPI.setLogger(CommandAPILogger.fromJavaLogger(getLogger()));
-
-        // Load the CommandAPI
-        CommandAPI.onLoad(
-            // Configure the CommandAPI
-            new CommandAPISpigotConfig(this)
-        );
-    }
-
-    @Override
     public void onEnable() {
-        CommandAPI.onEnable();
-
         saveDefaultConfig();
         logCompatibilityReport();
 
@@ -49,11 +32,6 @@ public class Main extends JavaPlugin {
         Metrics metrics = new Metrics(this, pluginId);
 
         Bukkit.broadcastMessage("CoreProtectTimeLapse enabled.");
-    }
-
-    @Override
-    public void onDisable() {
-        CommandAPI.onDisable();
     }
 
     private void logCompatibilityReport() {
