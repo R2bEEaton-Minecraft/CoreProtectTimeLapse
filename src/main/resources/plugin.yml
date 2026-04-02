@@ -1,6 +1,6 @@
 main: cc.spea.CoreProtectTimeLapse.Main
 name: CoreProtectTimeLapse
-version: 'v1.0.5'
+version: '1.2.0'
 api-version: '1.21'
 description: CoreProtectTimeLapse
 load: POSTWORLD
@@ -8,3 +8,14 @@ author: R2bEEaton
 website: spea.cc
 prefix: CoreProtectTimeLapse
 depend: [CoreProtect]
+commands:
+  cptl:
+    description: CoreProtectTimeLapse
+    aliases: [coreprotecttimelapse]
+    usage: /cptl <setup|start|stop|undo>
+    permission: coreprotecttimelapse.use
+    permission-message: "[CPTL] You must be an operator to use this command."
+permissions:
+  coreprotecttimelapse.use:
+    description: Allows use of /cptl
+    default: op
