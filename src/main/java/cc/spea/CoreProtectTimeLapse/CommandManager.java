@@ -1,5 +1,7 @@
 package cc.spea.CoreProtectTimeLapse;
 
+import net.coreprotect.CoreProtect;
+import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -26,12 +28,13 @@ import static org.bukkit.Bukkit.getServer;
 
 public class CommandManager implements CommandExecutor, TabCompleter {
     private static final String USE_PERMISSION = "coreprotecttimelapse.use";
+
     private final JavaPlugin plugin;
     private final FileConfiguration config;
-    private final FakeCoreProtectAPI api;
+    private final CoreProtectAPI api;
     private InterruptableThread rollbackThread;
     private Thread undoThread;
-    private final ArrayList<long[]> rolledBack = new ArrayList<>();
+    private final ArrayList<Integer> rollbackDepths = new ArrayList<>();
     private int lastRadius = -1;
     private Location lastLocation = null;
 
@@ -151,7 +154,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         }
 
         if (api == null || !api.isEnabled()) {
-            sendFancy(player, "CoreProtect is not enabled.");
+            sendFancy(player, "CoreProtect API is unavailable or too old (requires API v11+).");
             return true;
         }
 
@@ -167,8 +170,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             endTime = Long.parseLong(args[3]);
             interval = Integer.parseInt(args[4]);
             center = parseBlockLocation(player, args[5], args[6], args[7]);
-        }
-        catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             sendFancy(player, ex.getMessage());
             return true;
         }
@@ -220,11 +222,12 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             bossBar.setProgress(0);
 
             sendFancy(player, "Running initial rollback...");
-            rolledBack.clear();
+            rollbackDepths.clear();
 
             long currentTime = System.currentTimeMillis() / 1000L;
-            api.performRollback(finalEndTime, currentTime, null, null, null, null, null, finalRadius, finalCenter);
-            rolledBack.add(new long[]{finalEndTime, currentTime});
+            int initialRollbackDepth = toRollbackDepth(finalEndTime, currentTime);
+            api.performRollback(initialRollbackDepth, null, null, null, null, null, finalRadius, finalCenter);
+            rollbackDepths.add(initialRollbackDepth);
 
             if (rollbackThread.getInterrupt()) {
                 sendFancy(player, "Stopped job. Run `/cptl undo` to undo those changes.");
@@ -234,21 +237,26 @@ public class CommandManager implements CommandExecutor, TabCompleter {
 
             sendFancy(player, "Now stepping through your interval...");
 
-            for (long i = finalEndTime; i >= finalStartTime; i -= finalInterval) {
+            long cursor = finalEndTime;
+            while (cursor > finalStartTime) {
                 if (rollbackThread.getInterrupt()) {
                     sendFancy(player, "Stopped job. Run `/cptl undo` to undo those changes.");
                     bossBar.removeAll();
                     return;
                 }
 
-                if (finalEndTime != finalStartTime) {
-                    bossBar.setProgress((double) (finalEndTime - i) / (double) (finalEndTime - finalStartTime));
-                } else {
+                long nextCursor = Math.max(finalStartTime, cursor - finalInterval);
+                int rollbackDepth = toRollbackDepth(nextCursor, currentTime);
+                api.performRollback(rollbackDepth, null, null, null, null, null, finalRadius, finalCenter);
+                rollbackDepths.add(rollbackDepth);
+
+                if (finalEndTime == finalStartTime) {
                     bossBar.setProgress(1.0D);
+                } else {
+                    bossBar.setProgress((double) (finalEndTime - nextCursor) / (double) (finalEndTime - finalStartTime));
                 }
 
-                api.performRollback(i - finalInterval, i, null, null, null, null, null, finalRadius, finalCenter);
-                rolledBack.add(new long[]{i - finalInterval, i});
+                cursor = nextCursor;
             }
 
             sendFancy(player, "Job finished! Run `/cptl undo` to undo those changes.");
@@ -289,30 +297,25 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             sendFancy(player, "Undo in progress. You must wait for this to finish.");
             return true;
         }
-        if (rolledBack.isEmpty()) {
+        if (rollbackDepths.isEmpty()) {
             sendFancy(player, "Nothing to undo.");
             return true;
         }
         if (api == null || !api.isEnabled()) {
-            sendFancy(player, "CoreProtect is not enabled.");
+            sendFancy(player, "CoreProtect API is unavailable or too old (requires API v11+).");
             return true;
         }
 
         undoThread = new Thread(() -> {
-            Collections.reverse(rolledBack);
-            int i = 1;
-
             sendFancy(player, "Starting undo. Please do not reload or stop the server.");
             BossBar bossBar = Bukkit.createBossBar("Undo", BarColor.RED, BarStyle.SEGMENTED_10);
             bossBar.addPlayer(player);
 
             bossBar.setProgress(0);
-            for (long[] times : rolledBack) {
-                api.performRestore(times[0], times[1], null, null, null, null, null, lastRadius, lastLocation);
-                bossBar.setProgress((double) i / rolledBack.size());
-                i++;
-            }
-            rolledBack.clear();
+            int maxRollbackDepth = Collections.max(rollbackDepths);
+            api.performRestore(maxRollbackDepth, null, null, null, null, null, lastRadius, lastLocation);
+            bossBar.setProgress(1.0D);
+            rollbackDepths.clear();
             sendFancy(player, "Undo complete!");
             bossBar.removeAll();
         });
@@ -360,26 +363,30 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             .toList();
     }
 
-    private FakeCoreProtectAPI getCoreProtect() {
+    private CoreProtectAPI getCoreProtect() {
         Plugin plugin = getServer().getPluginManager().getPlugin("CoreProtect");
 
-        if (plugin == null || !plugin.isEnabled()) {
+        if (!(plugin instanceof CoreProtect coreProtectPlugin)) {
             return null;
         }
 
-        try {
-            FakeCoreProtectAPI coreProtect = new FakeCoreProtectAPI();
-            if (!coreProtect.isEnabled()) {
-                return null;
-            }
-
-            if (coreProtect.APIVersion() < 9) {
-                return null;
-            }
-
-            return coreProtect;
-        } catch (LinkageError ex) {
+        CoreProtectAPI coreProtectAPI = coreProtectPlugin.getAPI();
+        if (coreProtectAPI == null || !coreProtectAPI.isEnabled()) {
             return null;
         }
+
+        if (coreProtectAPI.APIVersion() < 11) {
+            return null;
+        }
+
+        return coreProtectAPI;
+    }
+
+    private int toRollbackDepth(long targetTimestamp, long nowTimestamp) {
+        long rollbackDepth = Math.max(0, nowTimestamp - targetTimestamp);
+        if (rollbackDepth > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        return (int) rollbackDepth;
     }
 }

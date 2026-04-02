@@ -19,7 +19,7 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
-    compileOnly ('net.coreprotect:coreprotect:22.4'){ transitive = false}
+    compileOnly ('net.coreprotect:coreprotect:23.1'){ transitive = false}
 }
 
 test {
