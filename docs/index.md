@@ -8,7 +8,7 @@ This tool is best used with [ReplayMod](https://modrinth.com/mod/replaymod/) or 
 
 # Requirements
 
-- Minecraft `1.21` through `1.21.10`
+- Minecraft `1.21` through `1.21.X`
 - Java `21`
 - CoreProtect `23.1+` (API v11+)
 
