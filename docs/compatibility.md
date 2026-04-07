@@ -10,7 +10,7 @@ CoreProtectTimeLapse currently supports:
 
 CPTL uses the official public CoreProtect API instead of internal CoreProtect classes. This gives better compatibility across patch versions.
 
-As of CPTL `1.2.0`, commands are handled with Bukkit's built-in command API and declared in `plugin.yml`. This avoids loading a shaded CommandAPI dependency on newer Paper/Spigot versions.
+CPTL `1.3.0` handles commands with Bukkit's built-in command API and declares them in `plugin.yml`. This avoids loading a shaded CommandAPI dependency on newer Paper/Spigot versions.
 
 ## Startup compatibility report
 

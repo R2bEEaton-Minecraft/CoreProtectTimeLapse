@@ -6,6 +6,10 @@ Besides using its API, this tool is not affiliated with CoreProtect.
 
 This tool is best used with [ReplayMod](https://modrinth.com/mod/replaymod/) or [Flashback](https://modrinth.com/mod/flashback/) and *requires* [CoreProtect](https://modrinth.com/plugin/coreprotect) to be installed through the entire desired time-lapse period.
 
+# New in CPTL 1.3.0
+
+`/cptl start` now opens an interactive chat picker. The picker walks you through radius, start time, end time, interval, center location, and final confirmation. You can click bracketed suggestions in chat, such as `[256]`, `[7d ago]`, `[now]`, `[1d]`, `[current]`, and `[yes]`, or type exact values like `2026-04-01 18:30` or `~10 ~ ~-5`.
+
 # Requirements
 
 - Minecraft `1.21` through `1.21.X`

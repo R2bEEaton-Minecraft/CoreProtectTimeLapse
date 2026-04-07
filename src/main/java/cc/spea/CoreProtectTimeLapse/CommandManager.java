@@ -32,6 +32,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
     private final JavaPlugin plugin;
     private final FileConfiguration config;
     private final CoreProtectAPI api;
+    private final StartWizardManager startWizardManager;
     private InterruptableThread rollbackThread;
     private Thread undoThread;
     private final ArrayList<Integer> rollbackDepths = new ArrayList<>();
@@ -42,6 +43,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
         this.api = getCoreProtect();
         this.config = config;
+        this.startWizardManager = new StartWizardManager(plugin, this);
     }
 
     public void registerAll() {
@@ -52,6 +54,8 @@ public class CommandManager implements CommandExecutor, TabCompleter {
 
         command.setExecutor(this);
         command.setTabCompleter(this);
+        plugin.getServer().getPluginManager().registerEvents(startWizardManager, plugin);
+        startWizardManager.startCleanupTask();
     }
 
     @Override
@@ -77,6 +81,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             case "start" -> handleStart(sender, args);
             case "stop" -> handleStop(sender);
             case "undo" -> handleUndo(sender);
+            case "wizard" -> handleWizard(sender, args);
             default -> {
                 sendFancy(sender, "Unknown subcommand. Use /" + label + " <setup|start|stop|undo>.");
                 yield true;
@@ -95,7 +100,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 2 && "start".equalsIgnoreCase(args[0])) {
-            return List.of("100");
+            return filterPrefix(List.of("100", "cancel"), args[1]);
         }
 
         if (args.length >= 3 && args.length <= 5 && "start".equalsIgnoreCase(args[0])) {
@@ -148,62 +153,72 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args.length == 1) {
+            startWizardManager.start(player);
+            return true;
+        }
+
+        if (args.length == 2 && "cancel".equalsIgnoreCase(args[1])) {
+            startWizardManager.cancel(player);
+            return true;
+        }
+
         if (args.length != 8) {
             sendFancy(player, "Usage: /cptl start <radius> <startTime> <endTime> <interval> <x> <y> <z>");
             return true;
         }
 
-        if (api == null || !api.isEnabled()) {
-            sendFancy(player, "CoreProtect API is unavailable or too old (requires API v11+).");
-            return true;
-        }
-
-        int radius;
-        long startTime;
-        long endTime;
-        int interval;
-        Location center;
-
         try {
-            radius = Integer.parseInt(args[1]);
-            startTime = Long.parseLong(args[2]);
-            endTime = Long.parseLong(args[3]);
-            interval = Integer.parseInt(args[4]);
-            center = parseBlockLocation(player, args[5], args[6], args[7]);
+            StartOptions options = new StartOptions(
+                Integer.parseInt(args[1]),
+                Long.parseLong(args[2]),
+                Long.parseLong(args[3]),
+                Integer.parseInt(args[4]),
+                parseBlockLocation(player, args[5], args[6], args[7])
+            );
+            startTimelapse(player, options);
         } catch (IllegalArgumentException ex) {
             sendFancy(player, ex.getMessage());
-            return true;
         }
 
-        if (radius < 100 || radius > 512) {
+        return true;
+    }
+
+    boolean startTimelapse(Player player, StartOptions options) {
+        if (api == null || !api.isEnabled()) {
+            sendFancy(player, "CoreProtect API is unavailable or too old (requires API v11+).");
+            return false;
+        }
+
+        if (options.radius() < 100 || options.radius() > 512) {
             sendFancy(player, "Radius must be between 100 and 512.");
-            return true;
+            return false;
         }
 
-        if (startTime < 0 || endTime < 0) {
+        if (options.startTime() < 0 || options.endTime() < 0) {
             sendFancy(player, "startTime and endTime must be 0 or greater.");
-            return true;
+            return false;
         }
 
-        if (interval <= 0) {
+        if (options.interval() <= 0) {
             sendFancy(player, "interval must be greater than 0.");
-            return true;
+            return false;
         }
 
         if (undoThread != null && undoThread.isAlive()) {
             sendFancy(player, "Undo in progress. You must wait for this to finish.");
-            return true;
+            return false;
         }
         if (rollbackThread != null && rollbackThread.isAlive()) {
             sendFancy(player, "Timelapse in progress. To stop it, use the `/cptl stop` command.");
-            return true;
+            return false;
         }
 
-        lastRadius = radius;
-        lastLocation = center;
+        lastRadius = options.radius();
+        lastLocation = options.center();
 
-        long normalizedStartTime = startTime;
-        long normalizedEndTime = endTime;
+        long normalizedStartTime = options.startTime();
+        long normalizedEndTime = options.endTime();
         if (normalizedEndTime < normalizedStartTime) {
             long temp = normalizedStartTime;
             normalizedStartTime = normalizedEndTime;
@@ -212,9 +227,9 @@ public class CommandManager implements CommandExecutor, TabCompleter {
 
         final long finalStartTime = normalizedStartTime;
         final long finalEndTime = normalizedEndTime;
-        final int finalRadius = radius;
-        final int finalInterval = interval;
-        final Location finalCenter = center.clone();
+        final int finalRadius = options.radius();
+        final int finalInterval = options.interval();
+        final Location finalCenter = options.center().clone();
 
         rollbackThread = new InterruptableThread(() -> {
             BossBar bossBar = Bukkit.createBossBar("Timelapse", BarColor.GREEN, BarStyle.SEGMENTED_10);
@@ -264,6 +279,16 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         });
 
         rollbackThread.start();
+        return true;
+    }
+
+    private boolean handleWizard(CommandSender sender, String[] args) {
+        Player player = requirePlayer(sender);
+        if (player == null) {
+            return true;
+        }
+
+        startWizardManager.handleWizardCommand(player, args);
         return true;
     }
 
@@ -333,7 +358,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
         return null;
     }
 
-    private Location parseBlockLocation(Player player, String rawX, String rawY, String rawZ) {
+    Location parseBlockLocation(Player player, String rawX, String rawY, String rawZ) {
         Location base = player.getLocation();
         World world = player.getWorld();
         double x = parseCoordinate(rawX, base.getX());
