@@ -37,29 +37,40 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew clean shadowJar
 
+      - name: Resolve release artifact
+        id: artifact
+        shell: bash
+        run: |
+          FILE="$(find build/libs -maxdepth 1 -type f -name 'CoreProtectTimeLapse-*-all.jar' | head -n 1)"
+          test -f "$FILE"
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+
       # An optional step to also upload the `.jar` to the GitHub release assets
       - name: Upload to release
+        if: github.event_name == 'release'
         uses: JasonEtco/upload-to-release@master
         with:
           # Make sure that this matches the file name of your .jar
-          args: build/libs/CoreProtectTimeLapse-${{ github.event.release.tag_name }}-all.jar application/java-archive
+          args: ${{ steps.artifact.outputs.file }} application/java-archive
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 
       - name: Upload to Modrinth
+        if: github.event_name == 'release'
         uses: cloudnode-pro/modrinth-publish@1.0.0
         with:
           token: ${{ secrets.MODRINTH_TOKEN }}
           project: 64UYguZE
-          file: build/libs/CoreProtectTimeLapse-${{ github.event.release.tag_name }}-all.jar
+          file: ${{ steps.artifact.outputs.file }}
           changelog: ${{ github.event.release.body }}
           loaders: paper, spigot
           api-domain: api.modrinth.com
 
       - name: "Upload to CurseForge"
+        if: github.event_name == 'release'
         uses: itsmeow/curseforge-upload@v3
         with:
-          file_path: "build/libs/CoreProtectTimeLapse-${{ github.event.release.tag_name }}-all.jar"
+          file_path: "${{ steps.artifact.outputs.file }}"
           game_endpoint: "bukkit"
           relations: "coreprotect:requiredDependency"
           game_versions: "Minecraft 1.21.4,Java 21,Bukkit"
