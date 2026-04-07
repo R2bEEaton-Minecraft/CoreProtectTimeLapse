@@ -35,13 +35,13 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle Wrapper
-        run: ./gradlew clean shadowJar
+        run: ./gradlew clean build
 
       - name: Resolve release artifact
         id: artifact
         shell: bash
         run: |
-          FILE="$(find build/libs -maxdepth 1 -type f -name 'CoreProtectTimeLapse-*-all.jar' | head -n 1)"
+          FILE="$(find build/libs -maxdepth 1 -type f -name 'CoreProtectTimeLapse-*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' | head -n 1)"
           test -f "$FILE"
           echo "file=$FILE" >> "$GITHUB_OUTPUT"
 
