@@ -7,9 +7,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class Main extends JavaPlugin {
     FileConfiguration config = getConfig();
 
@@ -36,7 +33,7 @@ public class Main extends JavaPlugin {
 
     private void logCompatibilityReport() {
         String bukkitVersion = Bukkit.getBukkitVersion();
-        boolean inSupportedRange = isInSupportedRange(bukkitVersion);
+        boolean inSupportedRange = VersionSupport.isSupportedMinecraft(bukkitVersion);
 
         Plugin coreProtectPlugin = getServer().getPluginManager().getPlugin("CoreProtect");
         String coreProtectVersion = coreProtectPlugin == null ? "not installed" : coreProtectPlugin.getDescription().getVersion();
@@ -47,13 +44,13 @@ public class Main extends JavaPlugin {
             CoreProtectAPI coreProtectAPI = coreProtect.getAPI();
             if (coreProtectAPI != null && coreProtectAPI.isEnabled()) {
                 coreProtectApi = coreProtectAPI.APIVersion();
-                coreProtectReady = coreProtectApi >= 11;
+                coreProtectReady = VersionSupport.isSupportedCoreProtectApi(coreProtectApi);
             }
         }
 
         getLogger().info("Compatibility report:");
         getLogger().info(" - Detected Bukkit version: " + bukkitVersion);
-        getLogger().info(" - Supported Minecraft range: 1.21 - 1.21.10");
+        getLogger().info(" - Supported Minecraft range: " + VersionSupport.SUPPORTED_MINECRAFT_RANGE);
         getLogger().info(" - Detected CoreProtect version: " + coreProtectVersion + (coreProtectApi > -1 ? " (API v" + coreProtectApi + ")" : ""));
 
         if (inSupportedRange && coreProtectReady) {
@@ -64,17 +61,5 @@ public class Main extends JavaPlugin {
         String mcStatus = inSupportedRange ? "ok" : "outside supported range";
         String cpStatus = coreProtectReady ? "ok" : "requires CoreProtect API v11+ (CoreProtect 23.1+)";
         getLogger().warning(" - Status: compatibility warning (Minecraft: " + mcStatus + ", CoreProtect: " + cpStatus + ").");
-    }
-
-    private boolean isInSupportedRange(String bukkitVersion) {
-        Matcher matcher = Pattern.compile("(\\d+)\\.(\\d+)(?:\\.(\\d+))?").matcher(bukkitVersion);
-        if (!matcher.find()) {
-            return false;
-        }
-
-        int major = Integer.parseInt(matcher.group(1));
-        int minor = Integer.parseInt(matcher.group(2));
-        int patch = matcher.group(3) == null ? 0 : Integer.parseInt(matcher.group(3));
-        return major == 1 && minor == 21 && patch >= 0 && patch <= 10;
     }
 }
